@@ -19,7 +19,7 @@ public class QVendor extends EntityPathBase<Vendor> {
 
     public static final QVendor vendor = new QVendor("vendor");
 
-    public final NumberPath<Double> balance = createNumber("balance", Double.class);
+    public final NumberPath<Integer> balance = createNumber("balance", Integer.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 

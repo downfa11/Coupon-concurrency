@@ -28,17 +28,18 @@ public class CouponService {
 
     public User generateRandomUser() {
         User user = new User();
+        user = userRepository.save(user);
         user.setName("User" + user.getId());
-        userRepository.save(user);
-        return user;
+        return userRepository.save(user);
     }
+
 
     public Vendor generateRandomVendor() {
         Vendor vendor = new Vendor();
+        vendor = vendorRepository.save(vendor);
         vendor.setName("Vendor" + vendor.getId());
         vendor.setBalance(random.nextInt() * 1000);
-        vendorRepository.save(vendor);
-        return vendor;
+        return vendorRepository.save(vendor);
     }
 
     @Transactional
@@ -52,7 +53,7 @@ public class CouponService {
 
             Coupon coupon = new Coupon();
             coupon.setType(couponType);
-            coupon.setCount(100);
+            coupon.setCount(5000);
             coupon.setValue(getCouponValue(couponType));
             coupon.setVendor(vendor);
 
@@ -76,17 +77,22 @@ public class CouponService {
             User user = userOptional.get();
             Coupon coupon = couponOptional.get();
 
+            if (coupon.getCount() <= 0) {
+                return false;
+            }
 
                 user.getCoupons().add(coupon);
                 coupon.setCount(coupon.getCount() - 1);
+            userRepository.save(user);
+            couponRepository.save(coupon);
+
                 if (coupon.getCount() == 0) {
                     couponRepository.delete(coupon);
-                } else {
-                    userRepository.save(user);
-                    couponRepository.save(coupon);
+                }
+
                     payToVendor(coupon);
                     return true;
-                }
+
         }
 
         return false;

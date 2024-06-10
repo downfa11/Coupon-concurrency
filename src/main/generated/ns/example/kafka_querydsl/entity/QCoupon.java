@@ -28,7 +28,7 @@ public class QCoupon extends EntityPathBase<Coupon> {
 
     public final StringPath type = createString("type");
 
-    public final NumberPath<Double> value = createNumber("value", Double.class);
+    public final NumberPath<Integer> value = createNumber("value", Integer.class);
 
     public final QVendor vendor;
 

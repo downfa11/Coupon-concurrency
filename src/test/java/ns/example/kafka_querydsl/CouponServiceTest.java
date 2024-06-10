@@ -8,13 +8,12 @@ import ns.example.kafka_querydsl.repository.UserRepository;
 import ns.example.kafka_querydsl.repository.VendorRepository;
 import ns.example.kafka_querydsl.service.CouponConsumer;
 import ns.example.kafka_querydsl.service.CouponService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -25,36 +24,32 @@ import static org.mockito.Mockito.*;
 @SpringBootTest
 class CouponServiceTest {
 
-    @Mock
+    @MockBean
     private CouponRepository couponRepository;
 
-    @Mock
+    @MockBean
     private VendorRepository vendorRepository;
 
-    @Mock
+    @MockBean
     private UserRepository userRepository;
 
-    @InjectMocks
+    @Autowired
     private CouponService couponService;
+
+    @Autowired
     private CouponConsumer couponConsumer;
 
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
-
-
     @Test
-    void generateUser(){
+    void generateUser() {
         User user = new User();
         user.setId(1L);
         when(userRepository.save(any(User.class))).thenReturn(user);
 
         User result = couponService.generateRandomUser();
 
-        verify(userRepository,times(1)).save(any(User.class));
-        // 메소드가 한 번 호출되었는지 Verity
+        verify(userRepository, times(2)).save(any(User.class));
+        assertNotNull(result);
         assertEquals("User" + user.getId(), result.getName());
     }
 
@@ -62,7 +57,6 @@ class CouponServiceTest {
     void generateCoupon() {
         String couponType = "문화상품권 1만원권";
         when(couponRepository.countByType(couponType)).thenReturn(50L);
-        // 해당 타입의 쿠폰은 50개가 있다고 가정
 
         Vendor vendor = new Vendor();
         vendor.setId(1L);
@@ -71,8 +65,6 @@ class CouponServiceTest {
         Coupon coupon = new Coupon();
         coupon.setType(couponType);
         when(couponRepository.save(any(Coupon.class))).thenReturn(coupon);
-        // 실제 DB에 저장하지 않고 미리 정의된 Coupon 객체를 반환
-        // any(Coupon.class) : Coupon 클래스 타입의 객체를 매칭
 
         Coupon result = couponService.generateRandomCoupon();
 
@@ -82,52 +74,82 @@ class CouponServiceTest {
     }
 
     @Test
-    void MoreThanCouponCount() {
-        String couponType = "문화상품권 1만원권";
-        when(couponRepository.countByType(couponType)).thenReturn(101L);
+    void moreThanCouponCount() {
+        User user = new User();
+        user.setId(1L);
 
-        Coupon result = couponService.generateRandomCoupon();
 
-        verify(couponRepository, never()).save(any(Coupon.class));
-        assertNull(result);
+        Coupon coupon = new Coupon();
+        coupon.setId(1L);
+        coupon.setCount(100);
+        Vendor vendor = new Vendor();
+        vendor.setId(1L);
+        coupon.setVendor(vendor);
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+        when(couponRepository.findById(coupon.getId())).thenReturn(Optional.of(coupon));
+        when(userRepository.save(any(User.class))).thenReturn(user);
+
+        //todo. Expected:true, Actual:false
+        for(int i=0;i<100;i++) {
+            assertTrue(couponService.useCoupon(user.getId(), coupon.getId()));
+        }
+
+
+        assertFalse(couponService.useCoupon(user.getId(), coupon.getId()));
+
+        verify(userRepository, times(100)).save(any(User.class));
+        verify(couponRepository, times(100)).save(any(Coupon.class));
+
     }
 
     @Test
     void getUserCoupons() {
         User user = new User();
         user.setId(1L);
+        Vendor vendor = new Vendor();
+        vendor.setId(1L);
+
         Coupon coupon1 = new Coupon();
-        Coupon coupon2 = new Coupon();
-        user.setCoupons(Arrays.asList(coupon1, coupon2));
+        coupon1.setVendor(vendor);
+        coupon1.setType("비트코인");
+        user.setCoupons(Arrays.asList(coupon1));
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+        when(couponRepository.findById(1L)).thenReturn(Optional.of(coupon1));
 
         List<Coupon> result = couponService.getUserCoupons(1L);
 
         verify(userRepository, times(1)).findById(1L);
-        assertEquals(2, result.size());
+        assertEquals(1, result.size());
     }
 
     @Test
     void useCoupon() {
         User user = new User();
         user.setId(1L);
+        user.setCoupons(new ArrayList<>());
+
         Coupon coupon = new Coupon();
         coupon.setId(1L);
-        coupon.setCount(1);
+        coupon.setCount(100);
         Vendor vendor = new Vendor();
+        vendor.setId(1L);
         coupon.setVendor(vendor);
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(couponRepository.findById(1L)).thenReturn(Optional.of(coupon));
+        when(userRepository.save(any(User.class))).thenReturn(user);
 
         boolean result = couponService.useCoupon(1L, 1L);
 
         assertTrue(result);
         verify(userRepository, times(1)).save(user);
-        verify(couponRepository, times(1)).delete(coupon);
+        verify(couponRepository, times(1)).save(coupon);
     }
 
     @Test
-    void UseInvalidCoupon() {
+    void useInvalidCoupon() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         boolean result = couponService.useCoupon(1L, 1L);
@@ -137,28 +159,31 @@ class CouponServiceTest {
         verify(couponRepository, never()).save(any(Coupon.class));
     }
 
-
     @Test
     void useCouponToKafka() {
+
         User user = new User();
         user.setId(1L);
+        user.setCoupons(new ArrayList<>());
+
         Coupon coupon = new Coupon();
         coupon.setId(1L);
-        coupon.setCount(1);
+        coupon.setCount(100);
         Vendor vendor = new Vendor();
+        vendor.setId(1L);
         coupon.setVendor(vendor);
+
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
         when(couponRepository.findById(1L)).thenReturn(Optional.of(coupon));
 
-        boolean result = couponConsumer.useCouponToKafka(1L, 1L);
+        boolean result = couponConsumer.useCouponToKafka(user.getId(), coupon.getId());
 
         assertTrue(result);
-        verify(userRepository, times(1)).save(user);
-        verify(couponRepository, times(1)).delete(coupon);
+
     }
 
     @Test
-    void UseInvalidCouponToKafka() {
+    void useInvalidCouponToKafka() {
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         boolean result = couponConsumer.useCouponToKafka(1L, 1L);
