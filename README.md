@@ -15,9 +15,9 @@ Apeche Kafka와 queryDSL 실습을 통해서 좀 더 손에 익도록 연습하�
   </br></br></br>
 
 ### 프로젝트 주의사항
-- docker-compose로 Zookeeper, Kafka, kafka-ui, mysql 컴포넌트 실행</br></br>
+- docker-compose로 Zookeeper, Kafka, kafka-ui, mysql 컴포넌트 실행  
 
-- 프로젝트는 Junit 테스트코드를 위해 로컬에서 수행  </br></br>
+- 프로젝트는 Junit 테스트코드를 위해 로컬에서 수행  
   
 - Terminal 에서 다음 명령어로 Docker-compose 파일을 실행  
   ```
