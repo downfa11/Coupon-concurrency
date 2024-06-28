@@ -1,44 +1,25 @@
-# 토이프로젝트 - Kafka와 QueryDSL
+# Apache kafka 트랜잭션과 동시성 관리
 Apeche Kafka와 queryDSL 실습을 통해서 좀 더 손에 익도록 연습하기 위해 준비한 공부용 프로젝트. </br></br>
-2024-06-19 추가) Kafka의 `Consumer Group`에 대해 공부하기 위해서 신규 기능을 추가했습니다.</br></br>
-Kafka의 이벤트 브로커를 이용해서 상품 구매 비즈니스(`Order -> Payment -> Shipment`)와 전체 과정의 `Notification`을 구현 
-</br></br>
-**상품 구매 비즈니스 설계**
 
-- 주문 생성 : 주문 정보를 DB에 저장하고, 메시징 큐에 주문 생성 이벤트를 발행
-- 재고 관리 서비스 : 재고 수량을 확인
-- 결제 서비스 : 결제에 성공하면 결제 완료 이벤트를 발행
-- 배송 서비스 : 결제 완료된 주문에 대해서 배송 준비 이벤트를 발행
-- 알림 서비스 : 모든 이벤트를 구독해서 상태를 로그로 출력
-  </br></br>
-QueryDSL은 진행중
+### 2024-06-28 업데이트 내용
+2024-06-19 추가) Kafka의 `Consumer Group`에 대해 공부하기 위해서 신규 기능을 추가했습니다.</br>
+- Kafka의 이벤트 브로커를 이용해서 상품 구매 비즈니스(`Order -> Payment -> Shipment`)와 전체 과정의 `Notification`을 구현 
+
+2024-06-28 추가) 기존의 Coupon 발급 시스템과 상품 구매 비즈니스를 통합했습니다.</br>
+- Redis의 _Redisson_ 라이브러리를 통해 **분산 락(`distributed lock`) 구현**</br>
+- 동시 요청에 대한 **배타적 락(`xlock`) 사용 여부**에 따라 테스트코드 작성
+
 </br></br>
 
-성능 테스트 결과는 블로그에 기록  </br>
-https://blog.naver.com/downfa11/223474922882 
-</br></br>
 
-**Kafka 사용 전 후의 성능 비교**
-- `useCoupon *` 함수들은 발급된 쿠폰들에 대해서 전체 총량을 줄이고, 쿠폰 발급사(`Vendor`)에게 비용을 지급한다.
-- `useCoupon`와 Kafka를 통해 작업하는 `useCouponToKafka` 간의 성능 테스트를 진행
-- 대용량 트래픽에 대해서 TPS, Latency 등의 성능 지표로 비교  
-</br>
-
-**동시성(Concurrency) 제어 확인**
-- `@KafkaListener()`의 `concurrency` 인자를 통해서 동시에 처리할 쓰레드를 지정
-- 전체 쿠폰 개수의 총량이 지켜지는지 동시에 검사
-  </br></br>
-
-
-## 프로젝트 주의사항
-- docker-compose로 Zookeeper, Kafka, kafka-ui, mysql 컴포넌트 실행  
-
-- 프로젝트는 Junit 테스트코드를 위해 로컬에서 수행  
-  
+### 프로젝트 주의사항
+- docker-compose로 zookeeper, Kafka, kafka-ui, mysql 컴포넌트 실행 </br>
+  _kafka zraft mode: docker-composer-cluster.yaml_
 - Terminal 에서 다음 명령어로 Docker-compose 파일을 실행  
   ```
   docker-compose up -d
   ```
+- JUnit 테스트코드를 위해 로컬에서 직접 실행
 
   </br></br>
   
@@ -67,7 +48,40 @@ https://blog.naver.com/downfa11/223474922882
 
 
 
+</br></br>
+
+## 프로젝트 개요
+
+### 상품 구매 비즈니스 설계
+
+- 주문 생성(Order) : 주문 정보를 DB에 저장하고, 메시징 큐에 주문 생성 이벤트를 발행
+- 재고 관리 서비스(Inventory) : 재고 수량을 조절 - **Redisson을 이용한 동시성(`Concurrency`) 제어**
+- 알림 서비스(Notificaion) : 모든 이벤트를 구독해서 상태를 로그로 출력
+  </br></br>
+
+</br></br>
+
+### Kafka 사용 전후간 성능 비교
+- `useCoupon *` : 함수들은 발급된 쿠폰들에 대해서 전체 총량을 줄이고, `Vendor`에게 비용을 지급
+- `useCoupon`와 Kafka를 통해 작업하는 `useCouponToKafka` 간의 성능 테스트를 진행</br></br>
+  
+- 대용량 트래픽에 대해서 TPS, Latency 등의 성능 지표로 비교
+  - [기술 블로그](https://blog.naver.com/downfa11/223474922882) 기록
+    </br>
+</br></br>
+
+### 동시성(Concurrency) 제어 확인
+Redis에서 제공하는 Redisson 라이브러리에서 분산 락(distributed lock) 제공</br>
+  - `tryLock(waitTime, leaseTime, TimeUnit)` : waitTime동안 Lock 점유를 시도하고, leaseTime만큼 락을 사용하거나 lock 해제</br>
+  lock 접근시 선행 쓰레드가 존재하면 waitTime동안 Lock 점유를 기다린다.  </br>
+  leaseTime만큼 지나면 lock이 해제되기 때문에 다른 쓰레드도 일정 시간이 지나면 Lock을 점유할 수 있다는 장점
 </br></br></br>
+**InventoryServiceTest의 `BuyWithoutLock`, `BuyWithLock` 간의 차이를 확인**
+  - Lock 사용시 동시 접근이 제한되어 원하는 로직이 잘 수행됨
+  - Lock 미사용시 중복해서 개수를 소모하지 않는 경우를 확인
+
+</br></br> 
+
 ### 모델
 
 쿠폰은 종류마다 전체 100개를 초과할 수 없다.

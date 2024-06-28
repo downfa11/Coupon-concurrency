@@ -112,7 +112,7 @@ public class CouponService {
                 return 10000;
             case "해피머니상품권 5천원권":
                 return 5000;
-            case "비트코인": // 97,919,000 KRW (2024-06-09 01:37 기준)
+            case "비트코인": // 97,919,000 KRW (2024-06-09 01:37)
                 return 97919000;
             default:
                 return 0;

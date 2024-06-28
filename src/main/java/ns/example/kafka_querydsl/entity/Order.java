@@ -6,6 +6,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @Builder
@@ -17,6 +20,9 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String client;
+    private String vendor;
     private String kind;
     private Long count;
+    private LocalDateTime createdAt;
 }
