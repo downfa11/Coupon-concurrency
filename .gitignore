@@ -250,3 +250,7 @@ db/data/\#innodb_redo/\#ib_redo106
 db/data/\#innodb_redo/\#ib_redo137_tmp
 db/data/binlog.000009
 db/data/kafka@002dquerydsl/orders.ibd
+db/data/\#innodb_redo/\#ib_redo108
+db/data/\#innodb_redo/\#ib_redo138_tmp
+db/data/\#innodb_redo/\#ib_redo139_tmp
+db/data/binlog.000010

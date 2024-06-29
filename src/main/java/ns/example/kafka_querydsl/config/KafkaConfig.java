@@ -1,5 +1,6 @@
 package ns.example.kafka_querydsl.config;
 
+import com.fasterxml.jackson.databind.JsonSerializable;
 import ns.example.kafka_querydsl.entity.Order;
 import ns.example.kafka_querydsl.utils.CouponUsedEvent;
 import ns.example.kafka_querydsl.utils.OrderEvent;
@@ -29,7 +30,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ConcurrentKafkaListenerContainerFactory<String, CouponUsedEvent> kafkaListenerContainerFactory() {
+    public ConcurrentKafkaListenerContainerFactory<String, CouponUsedEvent> kafkaListenerContainerFactoryCoupon() {
         ConcurrentKafkaListenerContainerFactory<String, CouponUsedEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
         return factory;
@@ -50,16 +51,7 @@ public class KafkaConfig {
     }
 
     @Bean
-    public ProducerFactory<String, OrderEvent> orderProducerFactory(){
-        Map<String, Object> configProps = new HashMap<>();
-        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG,"localhost:9092");
-        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG,StringSerializer.class);
-        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG,JsonSerializer.class);
-        return new DefaultKafkaProducerFactory<>(configProps);
-    }
-
-    @Bean
-    public ConsumerFactory<String, OrderEvent> orderConsumerFactory(){
+    public ConsumerFactory<String, OrderEvent> orderConsumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
         props.put(ConsumerConfig.GROUP_ID_CONFIG, "group_order");
@@ -69,7 +61,25 @@ public class KafkaConfig {
     }
 
     @Bean
-    public KafkaTemplate<String, OrderEvent> kafkaTemplateOrder(){
+    public ConcurrentKafkaListenerContainerFactory<String, OrderEvent> kafkaListenerContainerFactory() {
+        ConcurrentKafkaListenerContainerFactory<String, OrderEvent> factory = new ConcurrentKafkaListenerContainerFactory<>();
+        factory.setConsumerFactory(orderConsumerFactory());
+        return factory;
+    }
+
+    @Bean
+    public ProducerFactory<String, OrderEvent> orderProducerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        DefaultKafkaProducerFactory<String, OrderEvent> pf = new DefaultKafkaProducerFactory<>(configProps);
+        pf.setTransactionIdPrefix(("tx-"));
+        return pf;
+    }
+
+    @Bean
+    public KafkaTemplate<String, OrderEvent> kafkaTemplateOrder() {
         return new KafkaTemplate<>(orderProducerFactory());
     }
 }
