@@ -18,6 +18,9 @@ jobs:
         with:
           java-version: 17
 
+      - name: Grant execute permission to gradlew
+        run: chmod +x ./gradlew
+        
       - name: Install Docker Compose
         run: |
           sudo apt-get update
