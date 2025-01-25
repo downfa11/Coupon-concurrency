@@ -254,3 +254,16 @@ db/data/\#innodb_redo/\#ib_redo108
 db/data/\#innodb_redo/\#ib_redo138_tmp
 db/data/\#innodb_redo/\#ib_redo139_tmp
 db/data/binlog.000010
+db/data/\#innodb_redo/\#ib_redo10
+db/data/\#innodb_redo/\#ib_redo9
+db/data/\#innodb_temp/temp_1.ibt
+db/data/\#innodb_temp/temp_10.ibt
+db/data/\#innodb_temp/temp_2.ibt
+db/data/\#innodb_temp/temp_3.ibt
+db/data/\#innodb_temp/temp_4.ibt
+db/data/\#innodb_temp/temp_5.ibt
+db/data/\#innodb_temp/temp_6.ibt
+db/data/\#innodb_temp/temp_7.ibt
+db/data/\#innodb_temp/temp_8.ibt
+db/data/\#innodb_temp/temp_9.ibt
+db/data/ibtmp1
