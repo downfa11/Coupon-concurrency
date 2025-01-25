@@ -1,21 +1,23 @@
 package ns.example.kafka_querydsl.service;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.Random;
 import lombok.AllArgsConstructor;
-import ns.example.kafka_querydsl.entity.User;
-import ns.example.kafka_querydsl.entity.Coupon;
-import ns.example.kafka_querydsl.entity.Vendor;
+import lombok.extern.slf4j.Slf4j;
+import ns.example.kafka_querydsl.domain.Coupon;
+import ns.example.kafka_querydsl.domain.CouponType;
+import ns.example.kafka_querydsl.domain.User;
+import ns.example.kafka_querydsl.domain.Vendor;
 import ns.example.kafka_querydsl.repository.CouponRepository;
 import ns.example.kafka_querydsl.repository.UserRepository;
 import ns.example.kafka_querydsl.repository.VendorRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Random;
-
 @Service
+@Slf4j
 @AllArgsConstructor
 public class CouponService {
     private static final Random random = new Random();
@@ -44,28 +46,41 @@ public class CouponService {
 
     @Transactional
     public Coupon generateRandomCoupon() {
-        List<String> couponTypes = Arrays.asList("문화상품권 1만원권", "해피머니상품권 5천원권", "비트코인");
-        String couponType = couponTypes.get(new Random().nextInt(couponTypes.size()));
+        CouponType randomType = getRandomCouponType();
 
-        Long couponCount = couponRepository.countByType(couponType);
+        Long couponCount = couponRepository.countByType(randomType.name());
         if (couponCount < MAX_COUPONS) {
-            Vendor vendor = vendorRepository.findById(1L).orElseThrow();
+            Vendor vendor = vendorRepository.findById(1L)
+                    .orElseThrow(() -> new IllegalArgumentException("Not found Vendor"));
 
-            Coupon coupon = new Coupon();
-            coupon.setType(couponType);
-            coupon.setCount(5000);
-            coupon.setValue(getCouponValue(couponType));
-            coupon.setVendor(vendor);
+            Coupon coupon = Coupon.builder()
+                    .couponType(randomType)
+                    .title(randomType.getTitle())
+                    .totalQuantity(5000)
+                    .discountAmount(randomType.getValue())
+                    .issuedQuantity(0)
+                    .vendor(vendor)
+                    .startDate(LocalDateTime.now())
+                    .endDate(LocalDateTime.now().plusDays(1))
+                    .build();
 
             return couponRepository.save(coupon);
         }
-
         return null;
+    }
+
+    private CouponType getRandomCouponType() {
+        CouponType[] types = CouponType.values();
+        return types[new Random().nextInt(types.length)];
     }
 
     public List<Coupon> getUserCoupons(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
         return user.getCoupons();
+    }
+
+    public Coupon findCoupon(Long couponId) {
+        return couponRepository.findById(couponId).orElseThrow();
     }
 
     @Transactional
@@ -77,21 +92,21 @@ public class CouponService {
             User user = userOptional.get();
             Coupon coupon = couponOptional.get();
 
-            if (coupon.getCount() <= 0) {
+            if (coupon.getIssuedQuantity() <= 0) {
                 return false;
             }
 
-                user.getCoupons().add(coupon);
-                coupon.setCount(coupon.getCount() - 1);
+            user.getCoupons().add(coupon);
+            coupon.setIssuedQuantity(coupon.getIssuedQuantity() - 1);
             userRepository.save(user);
             couponRepository.save(coupon);
 
-                if (coupon.getCount() == 0) {
-                    couponRepository.delete(coupon);
-                }
+            if (coupon.getIssuedQuantity() == 0) {
+                couponRepository.delete(coupon);
+            }
 
-                    payToVendor(coupon);
-                    return true;
+            payToVendor(coupon);
+            return true;
 
         }
 
@@ -100,25 +115,11 @@ public class CouponService {
 
     public void payToVendor(Coupon coupon) {
         Vendor vendor = coupon.getVendor();
-        int couponValue = coupon.getValue();
+        int couponValue = coupon.getDiscountAmount();
         int vendorPayment = (int) (couponValue * COUPON_RATE);
         vendor.setBalance(vendor.getBalance() + vendorPayment);
         vendorRepository.save(vendor);
     }
-
-    private int getCouponValue(String couponType) {
-        switch (couponType) {
-            case "문화상품권 1만원권":
-                return 10000;
-            case "해피머니상품권 5천원권":
-                return 5000;
-            case "비트코인": // 97,919,000 KRW (2024-06-09 01:37)
-                return 97919000;
-            default:
-                return 0;
-        }
-    }
-
 }
 
 

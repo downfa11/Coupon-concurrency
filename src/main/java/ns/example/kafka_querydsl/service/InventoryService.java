@@ -1,19 +1,18 @@
 package ns.example.kafka_querydsl.service;
 
+import java.util.concurrent.TimeUnit;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import ns.example.kafka_querydsl.utils.OrderEvent;
+import ns.example.kafka_querydsl.dto.OrderEvent;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
-@AllArgsConstructor
 public class InventoryService {
 
 
@@ -21,12 +20,20 @@ public class InventoryService {
 
     private final RedissonClient redissonClient;
     private final String prefix = "stock";
-    private KafkaTemplate<String, OrderEvent> kafkaTemplate;
+
+    private final CouponQueueService queueService;
+
+    @Autowired
+    public InventoryService(RedissonClient redissonClient,
+                            @Qualifier("kafkaCouponQueueService") CouponQueueService queueService) {
+        this.redissonClient = redissonClient;
+        this.queueService = queueService;
+    }
 
     @KafkaListener(topics = "order_created",groupId = "group_order")
     public void handleOrderCreatedKafka(OrderEvent order){
         boolean isStock = checkStock(order);
-        kafkaTemplate.send((isStock ? "order_successed" : "order_canceled"),order);
+        queueService.enqueue((isStock ? "order_successed" : "order_canceled"),order);
     }
 
     public void handleOrderCreated(OrderEvent order) {

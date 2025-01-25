@@ -1,13 +1,13 @@
-package ns.example.kafka_querydsl;
+package ns.example.kafka_querydsl.service;
 
-import ns.example.kafka_querydsl.entity.Coupon;
-import ns.example.kafka_querydsl.entity.User;
-import ns.example.kafka_querydsl.entity.Vendor;
+import ns.example.kafka_querydsl.domain.Coupon;
+import ns.example.kafka_querydsl.domain.CouponType;
+import ns.example.kafka_querydsl.domain.User;
+import ns.example.kafka_querydsl.domain.Vendor;
 import ns.example.kafka_querydsl.repository.CouponRepository;
 import ns.example.kafka_querydsl.repository.UserRepository;
 import ns.example.kafka_querydsl.repository.VendorRepository;
-import ns.example.kafka_querydsl.service.CouponConsumer;
-import ns.example.kafka_querydsl.service.CouponService;
+import ns.example.kafka_querydsl.utils.CouponConsumer;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -55,22 +55,22 @@ class CouponServiceTest {
 
     @Test
     void generateCoupon() {
-        String couponType = "문화상품권 1만원권";
-        when(couponRepository.countByType(couponType)).thenReturn(50L);
+        CouponType couponType = CouponType.CULTURE_LAND;
+        when(couponRepository.countByType(couponType.name())).thenReturn(50L);
 
         Vendor vendor = new Vendor();
         vendor.setId(1L);
         when(vendorRepository.findById(1L)).thenReturn(Optional.of(vendor));
 
         Coupon coupon = new Coupon();
-        coupon.setType(couponType);
+        coupon.setCouponType(couponType);
         when(couponRepository.save(any(Coupon.class))).thenReturn(coupon);
 
         Coupon result = couponService.generateRandomCoupon();
 
         verify(couponRepository, times(1)).save(any(Coupon.class));
         assertNotNull(result);
-        assertEquals(couponType, result.getType());
+        assertEquals(couponType, result.getCouponType());
     }
 
     @Test
@@ -81,7 +81,9 @@ class CouponServiceTest {
 
         Coupon coupon = new Coupon();
         coupon.setId(1L);
-        coupon.setCount(100);
+        coupon.setTotalQuantity(100);
+        coupon.setIssuedQuantity(100);
+        coupon.setDiscountAmount(10);
         Vendor vendor = new Vendor();
         vendor.setId(1L);
         coupon.setVendor(vendor);
@@ -112,7 +114,7 @@ class CouponServiceTest {
 
         Coupon coupon1 = new Coupon();
         coupon1.setVendor(vendor);
-        coupon1.setType("비트코인");
+        coupon1.setCouponType(CouponType.TEST_COUPON);
         user.setCoupons(Arrays.asList(coupon1));
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
@@ -132,7 +134,10 @@ class CouponServiceTest {
 
         Coupon coupon = new Coupon();
         coupon.setId(1L);
-        coupon.setCount(100);
+        coupon.setTotalQuantity(100);
+        coupon.setIssuedQuantity(100);
+        coupon.setDiscountAmount(10);
+
         Vendor vendor = new Vendor();
         vendor.setId(1L);
         coupon.setVendor(vendor);
@@ -168,7 +173,10 @@ class CouponServiceTest {
 
         Coupon coupon = new Coupon();
         coupon.setId(1L);
-        coupon.setCount(100);
+        coupon.setTotalQuantity(100);
+        coupon.setIssuedQuantity(100);
+        coupon.setDiscountAmount(10);
+
         Vendor vendor = new Vendor();
         vendor.setId(1L);
         coupon.setVendor(vendor);

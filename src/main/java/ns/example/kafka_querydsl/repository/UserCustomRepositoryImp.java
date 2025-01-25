@@ -1,10 +1,9 @@
 package ns.example.kafka_querydsl.repository;
 
 
-import com.querydsl.core.types.Projections;
 import com.querydsl.jpa.impl.JPAQueryFactory;
-import ns.example.kafka_querydsl.entity.QUser;
-import ns.example.kafka_querydsl.entity.User;
+import ns.example.kafka_querydsl.domain.QUser;
+import ns.example.kafka_querydsl.domain.User;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -15,7 +14,7 @@ public class UserCustomRepositoryImp implements UserCustomRepository{
 
     public UserCustomRepositoryImp(JPAQueryFactory jpaQueryFactory) {
         this.factory = jpaQueryFactory;
-        this.qUser=QUser.user;
+        this.qUser= QUser.user;
     }
 
     @Override

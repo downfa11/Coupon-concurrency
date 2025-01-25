@@ -1,8 +1,7 @@
 package ns.example.kafka_querydsl.controller;
 
 import lombok.AllArgsConstructor;
-import ns.example.kafka_querydsl.entity.Order;
-import ns.example.kafka_querydsl.entity.OrderRequest;
+import ns.example.kafka_querydsl.domain.OrderRequest;
 import ns.example.kafka_querydsl.service.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

@@ -1,23 +1,23 @@
 package ns.example.kafka_querydsl.controller;
 
+import java.util.List;
 import lombok.AllArgsConstructor;
-import ns.example.kafka_querydsl.entity.Coupon;
-import ns.example.kafka_querydsl.entity.User;
-import ns.example.kafka_querydsl.entity.Vendor;
-import ns.example.kafka_querydsl.service.CouponConsumer;
+import ns.example.kafka_querydsl.domain.Coupon;
+import ns.example.kafka_querydsl.domain.User;
+import ns.example.kafka_querydsl.domain.Vendor;
 import ns.example.kafka_querydsl.service.CouponService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @AllArgsConstructor
 public class CouponController {
 
     private final CouponService couponService;
-    private final CouponConsumer couponConsumer;
 
     @GetMapping("/random-user")
     public User getRandomUser() {
@@ -44,22 +44,5 @@ public class CouponController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
-
-    @PostMapping("/use/{couponId}")
-    public ResponseEntity<Void> useCoupon(@RequestParam Long userId, @PathVariable Long couponId) {
-        boolean success = couponService.useCoupon(userId, couponId);
-        if (success) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
-        }
-    }
-
-    @GetMapping("/use/kafka/{couponId}")
-    public ResponseEntity<Void> useCouponToKafka(@RequestParam Long userId, @PathVariable Long couponId) {
-        couponConsumer.useCouponToKafka(userId, couponId);
-        return ResponseEntity.ok().build();
-    }
-
 
 }

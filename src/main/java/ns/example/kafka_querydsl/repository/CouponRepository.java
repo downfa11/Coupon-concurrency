@@ -1,7 +1,7 @@
 package ns.example.kafka_querydsl.repository;
 
 import jakarta.persistence.LockModeType;
-import ns.example.kafka_querydsl.entity.Coupon;
+import ns.example.kafka_querydsl.domain.Coupon;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
 import org.springframework.stereotype.Repository;

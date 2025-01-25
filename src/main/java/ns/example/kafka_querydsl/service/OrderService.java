@@ -1,19 +1,26 @@
 package ns.example.kafka_querydsl.service;
 
 import lombok.AllArgsConstructor;
-import ns.example.kafka_querydsl.entity.Order;
+import ns.example.kafka_querydsl.domain.Order;
 import ns.example.kafka_querydsl.repository.OrderRepository;
-import ns.example.kafka_querydsl.utils.OrderEvent;
-import org.springframework.kafka.core.KafkaTemplate;
+import ns.example.kafka_querydsl.dto.OrderEvent;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 
 @Service
-@AllArgsConstructor
 public class OrderService {
-    private OrderRepository orderRepository;
-    private KafkaTemplate<String, OrderEvent> kafkaTemplate;
+    private final OrderRepository orderRepository;
+
+    private final CouponQueueService queueService;
+
+    @Autowired
+    public OrderService(OrderRepository orderRepository, @Qualifier("kafkaCouponQueueService") CouponQueueService queueService) {
+        this.orderRepository = orderRepository;
+        this.queueService = queueService;
+    }
 
     public void createOrder(String client, String vendor, String kind, Long count){
         Order order = Order.builder()
@@ -26,6 +33,6 @@ public class OrderService {
         orderRepository.save(order);
 
         OrderEvent event = new OrderEvent(order.getId(), order.getKind(), order.getCount());
-        kafkaTemplate.send("order_created",event);
+        queueService.enqueue("order_created",event);
     }
 }

@@ -1,4 +1,4 @@
-package ns.example.kafka_querydsl;
+package ns.example.kafka_querydsl.service;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

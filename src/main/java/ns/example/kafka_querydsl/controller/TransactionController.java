@@ -1,6 +1,6 @@
 package ns.example.kafka_querydsl.controller;
 
-import ns.example.kafka_querydsl.TransactionService;
+import ns.example.kafka_querydsl.service.TransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

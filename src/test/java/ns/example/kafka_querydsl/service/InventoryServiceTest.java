@@ -1,7 +1,6 @@
-package ns.example.kafka_querydsl;
+package ns.example.kafka_querydsl.service;
 
-import ns.example.kafka_querydsl.entity.Item;
-import ns.example.kafka_querydsl.service.InventoryService;
+import ns.example.kafka_querydsl.domain.Item;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

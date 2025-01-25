@@ -1,9 +1,7 @@
 package ns.example.kafka_querydsl.config;
 
-import com.fasterxml.jackson.databind.JsonSerializable;
-import ns.example.kafka_querydsl.entity.Order;
-import ns.example.kafka_querydsl.utils.CouponUsedEvent;
-import ns.example.kafka_querydsl.utils.OrderEvent;
+import ns.example.kafka_querydsl.dto.CouponUsedEvent;
+import ns.example.kafka_querydsl.dto.OrderEvent;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
