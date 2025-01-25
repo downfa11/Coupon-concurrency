@@ -40,6 +40,9 @@ dependencies {
 	//json
 	implementation 'com.googlecode.json-simple:json-simple:1.1.1'
 
+	//Redis
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
 	//QueryDSL
 	implementation 'com.querydsl:querydsl-jpa:5.0.0:jakarta'
 	annotationProcessor "com.querydsl:querydsl-apt:${dependencyManagement.importedProperties['querydsl.version']}:jakarta"
@@ -49,6 +52,11 @@ dependencies {
 	implementation "com.querydsl:querydsl-core"
 	implementation "com.querydsl:querydsl-collections"
 
+	//Actuator
+	implementation("org.springframework.boot:spring-boot-actuator")
+
+	//Prometheus
+	implementation("io.micrometer:micrometer-registry-prometheus")
 
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -56,6 +64,8 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.kafka:spring-kafka-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testImplementation 'org.junit.jupiter:junit-jupiter-api'
+
 
 }
 
