@@ -1,56 +1,39 @@
-# Apache kafka 트랜잭션과 동시성 관리
-Apeche Kafka와 queryDSL 실습을 통해서 좀 더 손에 익도록 연습하기 위해 준비한 공부용 프로젝트. </br></br>
+# 쿠폰 발급으로 알아보는 동시성(Concurrency) 로직
 
-### 2024-06-28 업데이트 내용
-2024-06-19 추가) Kafka의 `Consumer Group`에 대해 공부하기 위해서 신규 기능을 추가했습니다.</br>
-- Kafka의 이벤트 브로커를 이용해서 상품 구매 비즈니스(`Order -> Payment -> Shipment`)와 전체 과정의 `Notification`을 구현 
 
-2024-06-28 추가) 기존의 Coupon 발급 시스템과 상품 구매 비즈니스를 통합했습니다.</br>
+**약속**
+
+- queryDSL을 통한 쿼리 생성을 좀 더 몸에 습관들이기
+- Apache Kafka를 이용한 비즈니스 동작과 도입 전후의 성능 테스트
+- 비즈니스 특성상 동시에 요청하는 **쿠폰 등록 로직에 대한 동시성 처리**
+- 기존 Redisson 방식의 분산 락(Distributed Lock)에 대한 성능 개선점 모색
+<br>
+
+**2025-01-25**
+
+- Redisson을 이용한 분산 락 적용 전후로 성능 차이를 발견함
+Redis EVAL을 통해 스크립트로 전달하여 개선(RPS 764.5 -> )
+
+**2024-06-28**
+- 기존의 Coupon 발급 시스템과 상품 구매 비즈니스 통합</br>
 - Redis의 _Redisson_ 라이브러리를 통해 **분산 락(`distributed lock`) 구현**</br>
 - 동시 요청에 대한 **배타적 락(`xlock`) 사용 여부**에 따라 테스트코드 작성
 
-</br></br>
-
-
-### 프로젝트 주의사항
-- docker-compose로 zookeeper, Kafka, kafka-ui, mysql 컴포넌트 실행 </br>
-  _kafka zraft mode: docker-composer-cluster.yaml_
-- Terminal 에서 다음 명령어로 Docker-compose 파일을 실행  
-  ```
-  docker-compose up -d
-  ```
-- JUnit 테스트코드를 위해 로컬에서 직접 실행
-
-  </br></br>
-  
-## 프로젝트 구성
-
-`generateRandomCoupon`, `getRandomUser` : 랜덤으로 사용자 혹은 쿠폰을 발급하는 함수
-
-`getUserCoupons` : 해당 사용자가 가진 쿠폰을 표시하는 함수
-
-`useCoupon` : 쿠폰을 소모해서 사용자의 coupon에 등록하는 함수
-
-`payToVendor` : 쿠폰 소모시 업체에 비용을 지급하는 함수  
-
-</br></br>
-
-
-`handleOrderCreated` ,`createOrder` : 주문 생성해서 DB에 기록하고 order_created 이벤트 발행
-
-`handleOrderCreated`, `checkStock` : 재고 수량은 무조건 있다고 구성
-
-`processPayment` : 임시로 그냥 무조건 구매에 성공하도록 구성
-
-`handlePaymentCompleted`, `prepareShipping` : 배송 준비를 시작하고, 완료시 shipment_completed 이벤트 발행
-
-`notification*` : 일련의 모든 이벤트를 모니터링하면서 로깅
-
-
+**2024-06-19**
+- Kafka의 `Consumer Group`에 대해 공부하기 위해서 신규 기능 추가</br>
+- 상품 구매 비즈니스(`Order -> Payment -> Shipment`)와 전체 과정의 Notification을 구현
 
 </br></br>
 
 ## 프로젝트 개요
+- Terminal 에서 다음 명령어로 Docker-compose 파일을 실행 (zraft: docker-composer-cluster.yaml)
+  ```
+  docker-compose up -d
+  ```
+
+- **Github Actions을 이용한 테스트 자동화**
+
+  </br></br>
 
 ### 상품 구매 비즈니스 설계
 
@@ -81,6 +64,34 @@ Redis에서 제공하는 Redisson 라이브러리에서 분산 락(distributed l
   - Lock 미사용시 중복해서 개수를 소모하지 않는 경우를 확인
 
 </br></br> 
+
+## 프로젝트 구성
+
+`generateRandomCoupon`, `getRandomUser` : 랜덤으로 사용자 혹은 쿠폰을 발급하는 함수
+
+`getUserCoupons` : 해당 사용자가 가진 쿠폰을 표시하는 함수
+
+`useCoupon` : 쿠폰을 소모해서 사용자의 coupon에 등록하는 함수
+
+`payToVendor` : 쿠폰 소모시 업체에 비용을 지급하는 함수
+
+</br></br>
+
+
+`handleOrderCreated` ,`createOrder` : 주문 생성해서 DB에 기록하고 order_created 이벤트 발행
+
+`handleOrderCreated`, `checkStock` : 재고 수량은 무조건 있다고 구성
+
+`processPayment` : 임시로 그냥 무조건 구매에 성공하도록 구성
+
+`handlePaymentCompleted`, `prepareShipping` : 배송 준비를 시작하고, 완료시 shipment_completed 이벤트 발행
+
+`notification*` : 일련의 모든 이벤트를 모니터링하면서 로깅
+
+
+
+</br></br>
+
 
 ### 모델
 
