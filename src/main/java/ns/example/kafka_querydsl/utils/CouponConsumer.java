@@ -1,9 +1,10 @@
-package ns.example.kafka_querydsl.service;
+package ns.example.kafka_querydsl.utils;
 
 import lombok.AllArgsConstructor;
-import ns.example.kafka_querydsl.entity.Coupon;
-import ns.example.kafka_querydsl.utils.CouponUsedEvent;
-import ns.example.kafka_querydsl.entity.User;
+import ns.example.kafka_querydsl.domain.Coupon;
+import ns.example.kafka_querydsl.service.CouponService;
+import ns.example.kafka_querydsl.dto.CouponUsedEvent;
+import ns.example.kafka_querydsl.domain.User;
 import ns.example.kafka_querydsl.repository.CouponRepository;
 import ns.example.kafka_querydsl.repository.UserRepository;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -49,7 +50,7 @@ public class CouponConsumer {
     }
 
     private void publishCouponUsedEvent(User user, Coupon coupon) {
-        CouponUsedEvent event = new CouponUsedEvent(user.getId(), coupon.getId(), coupon.getValue());
+        CouponUsedEvent event = new CouponUsedEvent(user.getId(), coupon.getId(), coupon.getDiscountAmount());
         kafkaTemplate.send("coupon-used-topic", event);
     }
 

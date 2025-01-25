@@ -1,4 +1,4 @@
-package ns.example.kafka_querydsl.entity;
+package ns.example.kafka_querydsl.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;

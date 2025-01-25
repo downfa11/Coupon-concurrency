@@ -1,4 +1,4 @@
-package ns.example.kafka_querydsl.entity;
+package ns.example.kafka_querydsl.domain;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -16,19 +16,29 @@ import com.querydsl.core.types.dsl.PathInits;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QCoupon extends EntityPathBase<Coupon> {
 
-    private static final long serialVersionUID = -1779697602L;
+    private static final long serialVersionUID = 619739197L;
 
     private static final PathInits INITS = PathInits.DIRECT2;
 
     public static final QCoupon coupon = new QCoupon("coupon");
 
-    public final NumberPath<Integer> count = createNumber("count", Integer.class);
+    public final EnumPath<CouponType> couponType = createEnum("couponType", CouponType.class);
+
+    public final NumberPath<Integer> discountAmount = createNumber("discountAmount", Integer.class);
+
+    public final DateTimePath<java.time.LocalDateTime> endDate = createDateTime("endDate", java.time.LocalDateTime.class);
 
     public final NumberPath<Long> id = createNumber("id", Long.class);
 
-    public final StringPath type = createString("type");
+    public final NumberPath<Integer> issuedQuantity = createNumber("issuedQuantity", Integer.class);
 
-    public final NumberPath<Integer> value = createNumber("value", Integer.class);
+    public final DateTimePath<java.time.LocalDateTime> startDate = createDateTime("startDate", java.time.LocalDateTime.class);
+
+    public final StringPath title = createString("title");
+
+    public final NumberPath<Integer> totalQuantity = createNumber("totalQuantity", Integer.class);
+
+    public final StringPath type = createString("type");
 
     public final QVendor vendor;
 

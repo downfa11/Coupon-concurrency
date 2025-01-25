@@ -1,6 +1,6 @@
-package ns.example.kafka_querydsl;
+package ns.example.kafka_querydsl.service;
 
-import ns.example.kafka_querydsl.utils.OrderEvent;
+import ns.example.kafka_querydsl.dto.OrderEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;

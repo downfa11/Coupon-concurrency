@@ -1,4 +1,4 @@
-package ns.example.kafka_querydsl.utils;
+package ns.example.kafka_querydsl.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

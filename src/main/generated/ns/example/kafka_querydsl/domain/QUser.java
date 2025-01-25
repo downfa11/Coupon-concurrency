@@ -1,4 +1,4 @@
-package ns.example.kafka_querydsl.entity;
+package ns.example.kafka_querydsl.domain;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -16,7 +16,7 @@ import com.querydsl.core.types.dsl.PathInits;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QUser extends EntityPathBase<User> {
 
-    private static final long serialVersionUID = -430362141L;
+    private static final long serialVersionUID = -1607752286L;
 
     public static final QUser user = new QUser("user");
 

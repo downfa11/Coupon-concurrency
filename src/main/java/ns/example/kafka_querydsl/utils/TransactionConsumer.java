@@ -1,8 +1,8 @@
-package ns.example.kafka_querydsl;
+package ns.example.kafka_querydsl.utils;
 
 
 import lombok.extern.slf4j.Slf4j;
-import ns.example.kafka_querydsl.utils.OrderEvent;
+import ns.example.kafka_querydsl.dto.OrderEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 

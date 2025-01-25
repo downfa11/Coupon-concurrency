@@ -1,4 +1,4 @@
-package ns.example.kafka_querydsl.entity;
+package ns.example.kafka_querydsl.domain;
 
 import static com.querydsl.core.types.PathMetadataFactory.*;
 
@@ -15,7 +15,7 @@ import com.querydsl.core.types.Path;
 @Generated("com.querydsl.codegen.DefaultEntitySerializer")
 public class QOrder extends EntityPathBase<Order> {
 
-    private static final long serialVersionUID = -461896650L;
+    private static final long serialVersionUID = 1693714519L;
 
     public static final QOrder order = new QOrder("order1");
 
