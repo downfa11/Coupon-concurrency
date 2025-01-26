@@ -40,28 +40,29 @@ Redis EVAL을 통해 스크립트로 전달하여 개선(RPS 764.5 -> )
 - 주문 생성(Order) : 주문 정보를 DB에 저장하고, 메시징 큐에 주문 생성 이벤트를 발행
 - 재고 관리 서비스(Inventory) : 재고 수량을 조절 - **Redisson을 이용한 동시성(`Concurrency`) 제어**
 - 알림 서비스(Notificaion) : 모든 이벤트를 구독해서 상태를 로그로 출력
-  </br></br>
-
-</br></br>
 
 ### Kafka 사용 전후간 성능 비교
 - `useCoupon *` : 함수들은 발급된 쿠폰들에 대해서 전체 총량을 줄이고, `Vendor`에게 비용을 지급
-- `useCoupon`와 Kafka를 통해 작업하는 `useCouponToKafka` 간의 성능 테스트를 진행</br></br>
-  
+- `useCoupon`와 Kafka를 통해 작업하는 `useCouponToKafka` 간의 성능 테스트를 진행</br>
 - 대용량 트래픽에 대해서 TPS, Latency 등의 성능 지표로 비교
   - [기술 블로그](https://blog.naver.com/downfa11/223474922882) 기록
     </br>
-</br></br>
 
-### 동시성(Concurrency) 제어 확인
-Redis에서 제공하는 Redisson 라이브러리에서 분산 락(distributed lock) 제공</br>
-  - `tryLock(waitTime, leaseTime, TimeUnit)` : waitTime동안 Lock 점유를 시도하고, leaseTime만큼 락을 사용하거나 lock 해제</br>
-  lock 접근시 선행 쓰레드가 존재하면 waitTime동안 Lock 점유를 기다린다.  </br>
-  leaseTime만큼 지나면 lock이 해제되기 때문에 다른 쓰레드도 일정 시간이 지나면 Lock을 점유할 수 있다는 장점
-</br></br></br>
-**InventoryServiceTest의 `BuyWithoutLock`, `BuyWithLock` 간의 차이를 확인**
+### 쿠폰 발급 과정에 대한 동시성(Concurrency) 제어 확인
+Redis에서 제공하는 Redisson 라이브러리에서 분산 락(distributed lock) 제공
+  - `tryLock(waitTime, leaseTime, TimeUnit)` : waitTime동안 Lock 점유 시도, leaseTime만큼 락을 사용하거나 lock 해제
+  - lock 접근시 선행 쓰레드가 존재하면 waitTime동안 Lock 점유 대기
+  - leaseTime만큼 지나면 lock이 해제되기 때문에 다른 쓰레드도 일정 시간이 지나면 Lock을 점유함
+
+InventoryServiceTest의 `BuyWithoutLock`, `BuyWithLock` 간의 차이를 확인
   - Lock 사용시 동시 접근이 제한되어 원하는 로직이 잘 수행됨
   - Lock 미사용시 중복해서 개수를 소모하지 않는 경우를 확인
+
+### 메시지 송수신간 Kafka의 트랜잭션 처리 범위에 대한 연구
+본 내용은 블로그에 기록했습니다.
+
+[기술 블로그](https://blog.naver.com/downfa11/223495519589) 
+
 
 </br></br> 
 
