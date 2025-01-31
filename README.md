@@ -1,5 +1,8 @@
 # 쿠폰 발급으로 알아보는 동시성(Concurrency) 로직
 
+25-01-31 현재 새로운 도메인에서 필요한 기능을 고민하면서 새로운 프로젝트([Github](https://github.com/downfa11/ecommerce))로 개선중입니다.
+
+<br>
 
 **약속**
 
